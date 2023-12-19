@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Student;
 
 class StudentController extends Controller
 {
@@ -11,7 +12,9 @@ class StudentController extends Controller
      */
     public function index()
     {
-        //
+        // Retrieve and display all students
+        $students = Student::all();
+        return view('admin.students.index', ['students' => $students]);
     }
 
     /**
@@ -19,7 +22,8 @@ class StudentController extends Controller
      */
     public function create()
     {
-        //
+        // Show the form for creating a new student
+        return view('admin.students.create');
     }
 
     /**
@@ -27,7 +31,18 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Validate the request data
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'project_id' => 'required|exists:projects,id',
+        ]);
+
+        // Create a new Student object and save it to the database
+        Student::create($validatedData);
+
+        // Redirect to the index route after creating the student
+        return redirect()->route('admin.students.index')->with('success', 'Student created successfully.');
     }
 
     /**
@@ -35,7 +50,9 @@ class StudentController extends Controller
      */
     public function show(string $id)
     {
-        //
+        // Show the details of a specific student
+        $student = Student::find($id);
+        return view('admin.students.show', ['student' => $student]);
     }
 
     /**
@@ -43,7 +60,9 @@ class StudentController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        // Show the form for editing a specific student
+        $student = Student::find($id);
+        return view('admin.students.edit', ['student' => $student]);
     }
 
     /**
@@ -51,7 +70,18 @@ class StudentController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // Validate the request data
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'project_id' => 'required|exists:projects,id',
+        ]);
+
+        // Update the student with the validated data
+        Student::where('id', $id)->update($validatedData);
+
+        // Redirect to the show route after updating the student
+        return redirect()->route('admin.students.show', ['student_id' => $id])->with('success', 'Student updated successfully.');
     }
 
     /**
@@ -59,6 +89,14 @@ class StudentController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        // Delete a specific student
+        $student = Student::find($id);
+
+        if ($student) {
+            $student->delete();
+            return redirect()->route('admin.students.index')->with('success', 'Student deleted successfully');
+        } else {
+            return redirect()->route('admin.students.index')->with('error', 'Student not found');
+        }
     }
 }
