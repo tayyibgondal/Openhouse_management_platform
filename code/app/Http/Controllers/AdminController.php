@@ -119,21 +119,19 @@ class AdminController extends Controller
                         if ($evaluator->category === $projects->find($projectId)->category) {
                             // If this project and evaluator are not bound already
                             if (!in_array($evaluator->id, $evaluatorProjects->where('project_id', $projectId)->pluck('evaluator_id')->toArray())) {
-                                // Add a record in E_P table
-                                EvaluatorProject::create([
-                                    'evaluator_id' => $evaluator->id,
-                                    'project_id' => $projectId,
-                                ]);
+                                if ($evaluatorCounts[$evaluator->id] < 5) {
+                                    // Add a record in E_P table
+                                    EvaluatorProject::create([
+                                        'evaluator_id' => $evaluator->id,
+                                        'project_id' => $projectId,
+                                    ]);
 
-                                // Increment the counter of evaluator by 1
-                                $evaluatorCounts[$evaluator->id] += 1;
-                                // If evaluator count >= 5, remove it from E
-                                if ($evaluatorCounts[$evaluator->id] > 5) {
-                                    unset($evaluatorCounts[$evaluator->id]);
+                                    // Increment the counter of evaluator by 1
+                                    $evaluatorCounts[$evaluator->id] += 1;
+
+                                    $assigned = true;
+                                    break;
                                 }
-
-                                $assigned = true;
-                                break;
                             }
                         }
                     }
