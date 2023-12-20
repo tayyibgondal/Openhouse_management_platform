@@ -16,22 +16,25 @@ Route::prefix('login/')->name('login.')->group(function () {
     Route::get('project', [LoginController::class, 'projectLogin'])->name('project');
     Route::get('evaluator', [LoginController::class, 'evaluatorLogin'])->name('evaluator');
     Route::post('{role}', [LoginController::class, 'verify'])->name('verify');
+    Route::get( 'failed', [LoginController::class, 'failed'])->name('failed');
 });
 
 // -------------------
 // Evaluator Routes
 // -------------------
 Route::prefix('evaluator/{evaluator_id}/')->name('evaluator.')->group(function () {
-    Route::get('', [EvaluatorController::class, 'index'])->name('home');  // sees list of projects 
-    Route::get('{project_id}/edit', [ProjectController::class, 'edit'])->name('edit');  // details of a specific project
-    Route::put('{project_id}', [ProjectController::class, 'update'])->name('update');
+    Route::get('', [EvaluatorController::class, 'showProjects'])->name('home');  // sees list of projects 
+    Route::get('{project_id}/edit', [EvaluatorController::class, 'mark'])->name('mark');  // details of a specific project
+    Route::put('{project_id}', [EvaluatorController::class, 'updateMarks'])->name('update');
 });
 
 // -------------------
 // Project Routes
 // -------------------
-Route::prefix('project')->name('project.')->group(function () {
-    Route::get('{project_id}', [ProjectController::class, 'index'])->name('home');
+Route::prefix('project/')->name('project.')->group(function () {
+    Route::get('{project_id}', [ProjectController::class, 'show'])->name('home');
+    Route::get('{project_id}/edit', [ProjectController::class, 'edit'])->name('edit');  // details of a specific project
+    Route::put('{project_id}', [ProjectController::class, 'update'])->name('update');
 });
 // -------------------
 // Admin Routes
@@ -40,6 +43,7 @@ Route::prefix('admin/')->name('admin.')->group(function () {
     Route::get('', [AdminController::class, 'index'])->name('home');
     Route::get('assign', [AdminController::class, 'assign'])->name('assign');  
     Route::get('evaluations', [AdminController::class, 'seeEvaluations'])->name('evaluations');
+    // TODO: See and set locations
 
     Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
     Route::get('projects/{project_id}', [ProjectController::class, 'show'])->whereNumber('project_id')->name('projects.show');
