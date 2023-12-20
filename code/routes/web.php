@@ -7,6 +7,9 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\StudentController;
 
+// Default route
+Route::get('', [LoginController::class, 'index'])->name('home');
+
 // -------------------
 // Login Routes
 // -------------------
