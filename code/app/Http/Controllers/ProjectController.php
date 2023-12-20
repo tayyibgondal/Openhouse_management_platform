@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EvaluatorProject;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 class ProjectController extends Controller
 {
@@ -36,6 +38,7 @@ class ProjectController extends Controller
             'password' => 'required|string|max:255',
             'description' => 'required|string',
             'category' => 'required|string|max:255',
+            'location' => 'string'
         ]);
 
         // Create a new Project object and save it to the database
@@ -51,7 +54,16 @@ class ProjectController extends Controller
     public function show(string $id)
     {
         $project = Project::find($id);
-        return view('admin.projects.show', ['project' => $project]);
+        if (Route::currentRouteName() == 'project.home') {
+            // Get the number of evaluators who evaluated the project
+            // 'done' shows how many evaluators are done with marking this project
+            $done = $this->getEvaluators($id);
+            // Redirect to 'projects.show'
+            return view('projects.home', ['project' => $project, 'done'=>$done]);
+        } else {
+            // Redirect to 'admin.projects.show'
+            return view('admin.projects.show', ['project' => $project]);
+        }
     }
 
     /**
@@ -60,7 +72,13 @@ class ProjectController extends Controller
     public function edit(string $id)
     {
         $project = Project::find($id);
-        return view('admin.projects.edit', ['project' => $project]);
+
+        if(Route::currentRouteName() == 'project.edit') {
+            return view('projects.edit', ['project' => $project]);
+        }
+        else {
+            return view('admin.projects.edit', ['project' => $project]);
+        }
     }
 
     /**
@@ -75,10 +93,15 @@ class ProjectController extends Controller
             'password' => 'required|string|max:255',
             'description' => 'required|string',
             'category' => 'required|string|max:255',
+            'location' => 'string'
         ]);
 
         // Update the project with the validated data
         Project::where('id', $id)->update($validatedData);
+
+        if (Route::currentRouteName() == 'project.update') {
+            return redirect()->route('project.home', ['project_id' => $id])->with('success', 'Project updated successfully.');
+        }
 
         // Optionally, you can redirect to a specific route after updating the project
         return redirect()->route('admin.projects.show', ['project_id' => $id])->with('success', 'Project updated successfully.');
@@ -93,5 +116,12 @@ class ProjectController extends Controller
         $project->delete();
 
         return redirect()->route('admin.projects.index')->with('succes', 'Project deleted successfully');
+    }
+
+    // ==============================================================================================
+
+    public function getEvaluators(string $project_id) {
+        $count = EvaluatorProject::where('project_id', $project_id)->where('marks', '!=', -1)->count(); 
+        return $count;
     }
 }

@@ -9,7 +9,7 @@ class Project extends Model
 {
     use HasFactory;
     
-    protected $fillable = ['token', 'password', 'name', 'description', 'category'];
+    protected $fillable = ['token', 'password', 'name', 'description', 'category', 'location'];
 
     public function students()
     {
