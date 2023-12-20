@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Evaluator;
+use App\Models\EvaluatorProject;
+use App\Models\Project;
 use Illuminate\Http\Request;
 
 class EvaluatorController extends Controller
@@ -100,5 +102,39 @@ class EvaluatorController extends Controller
         } else {
             return redirect()->route('admin.evaluators.index')->with('error', 'Evaluator not found');
         }
+    }
+
+    public function showProjects(string $evaluator_id)
+    {
+        $projects = Evaluator::find($evaluator_id)->projects;
+        return view('evaluators.home', ['projects' => $projects, 'evaluator_id' => $evaluator_id]);
+    }
+
+
+    public function mark(string $evaluator_id, string $project_id)
+    {
+        $marks = EvaluatorProject::where('evaluator_id', $evaluator_id)
+            ->where('project_id', $project_id)
+            ->value('marks');
+        if (!isset($marks)) {
+            $marks = 'unmarked';
+        }
+        return view('evaluators.mark', ['marks' => $marks, 'project_id' => $project_id, 'evaluator_id' => $evaluator_id]);
+    }
+
+
+    public function updateMarks(string $evaluator_id, string $project_id, Request $request)
+    {
+        $marks = $request->input('marks');
+
+        // Find the specific EvaluatorProject record
+        $evaluation = EvaluatorProject::where('evaluator_id', $evaluator_id)
+            ->where('project_id', $project_id)
+            ->first();
+
+        // Update the marks for the found record
+        $evaluation->update(['marks' => $marks]);
+
+        return redirect()->route('evaluator.home', ['evaluator_id' => $evaluator_id])->with('success', 'Marks updated successfully.');
     }
 }

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('evaluator_project', function (Blueprint $table) {
             $table->id();
 
+            $table->integer('marks')->default(-1);
             $table->unsignedBigInteger('evaluator_id');
             $table->unsignedBigInteger('project_id');
 

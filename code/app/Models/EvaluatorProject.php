@@ -10,5 +10,5 @@ class EvaluatorProject extends Model
     use HasFactory;
 
     protected $table = "evaluator_project";
-    protected $fillable = ['evaluator_id', 'project_id'];
+    protected $fillable = ['evaluator_id', 'project_id', 'marks'];
 }
